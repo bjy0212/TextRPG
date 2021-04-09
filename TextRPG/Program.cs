@@ -1,14 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 
 namespace TextRPG {
     class Program {
-        public SaveData data = new SaveData();
-
         static void Main(string[] args) {
             /// Console.WriteLine("Hello World!");
             /// 게임의 기본 구조
-            bool life = true;   /// life of the game
 
             /** current scene
              * 0: 메인 메뉴
@@ -16,34 +14,69 @@ namespace TextRPG {
              */
             int scene = 0;
 
-            while (life) {
-                GameManager.Instance.Game(scene);
+            GameManager Game = new GameManager();
+
+            SaveManager.Save.Init();
+
+            Console.WriteLine("Initialization Complete!");
+
+            while (Game.life) {
+                Game.Game(scene);
             }
+            
+            return;
         }
     }
 
     class SaveData {
-        public int hp, maxHp, xp, maxXp, place, lv;
-        public string name;
-        public bool isDead;
+        public int hp = 100, maxHp = 100, xp = 0, maxXp = 100, place = 0, lv = 1;
+        public string name = "unknown";
+        public bool isDead = false;
 
         public SaveData() {
             if (File.Exists(@"Save.txt")) {
                 string[] lines = File.ReadAllLines(@"Save.txt");
                 foreach (string line in lines) {
+                    string[] param = line.Split(':');
+                    FieldInfo field = this.GetType().GetField(param[0]);
 
+                    switch(field.FieldType.ToString()) {
+                        case "System.Int32":
+                            field.SetValue(this, Int32.Parse(param[1]));
+                            break;
+
+                        case "System.Boolean":
+                            field.SetValue(this, Boolean.Parse(param[1]));
+                            break;
+
+                        case "System.String":
+                            field.SetValue(this, param[1]);
+                            break;
+
+                        default:
+                            Console.WriteLine("I got new type \"{0}\" here", field.FieldType.ToString());
+                            break;
+                    }
                 }
+                Console.WriteLine("저장 내역을 불러왔습니다.");
             } else {
-
+                string[] savings = new string[8];
+                System.Reflection.FieldInfo[] values = this.GetType().GetFields();
+                for (int i = 0; i < savings.Length; i++) {
+                    savings[i] = values[i].Name.ToString() + ":" + values[i].GetValue(this).ToString();
+                }
+                File.WriteAllLines(@"Save.txt", savings);
+                Console.WriteLine("새로운 저장 파일을 생성했습니다.");
             }
         }
+
+        public void Init() { }
     }
 
-    class SaveSingleTone {
-        private SaveSingleTone() { }
+    class SaveManager {
         private static SaveData instance = null;
 
-        public static SaveData Instance {
+        public static SaveData Save {
             get {
                 if (instance == null) instance = new SaveData();
                 return instance;
@@ -66,15 +99,7 @@ namespace TextRPG {
     }
 
     class GameManager {
-        private GameManager() { }
-        private static GameManager instance = null;
-
-        public static GameManager Instance {
-            get {
-                if (instance == null) instance = new GameManager();
-                return instance;
-            }
-        }
+        public bool life = true;
 
         public void Game(int scene) {
             switch (scene) {
@@ -91,7 +116,24 @@ namespace TextRPG {
         /// 메인 메뉴 함수
         /// </summary>
         private void MainMenu() {
+            Console.Clear();
+            Console.WriteLine("[메인 메뉴]\n1.게임 시작\n2.옵션\n3.종료\n\n────────────────────\n[입력]");
+            string read = Console.ReadLine();
+            switch (read) {
+                case "1":
+                    Console.WriteLine("1번 입력됨");
+                    break;
 
+                case "2":
+                    break;
+
+                case "3":
+                    this.life = false;
+                    break;
+
+                default:
+                    break;
+            }
         }
     }
 }
