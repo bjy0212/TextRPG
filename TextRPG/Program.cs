@@ -35,9 +35,9 @@ namespace TextRPG {
 
         public SaveData() {
             if (File.Exists(@"Save.txt")) {
-                string[] lines = File.ReadAllLines(@"Save.txt");
+                string[] lines = File.ReadAllLines(@"Save.ini");
                 foreach (string line in lines) {
-                    string[] param = line.Split(':');
+                    string[] param = line.Split('=');
                     FieldInfo field = this.GetType().GetField(param[0]);
 
                     switch(field.FieldType.ToString()) {
@@ -63,9 +63,9 @@ namespace TextRPG {
                 string[] savings = new string[8];
                 System.Reflection.FieldInfo[] values = this.GetType().GetFields();
                 for (int i = 0; i < savings.Length; i++) {
-                    savings[i] = values[i].Name.ToString() + ":" + values[i].GetValue(this).ToString();
+                    savings[i] = values[i].Name.ToString() + "=" + values[i].GetValue(this).ToString();
                 }
-                File.WriteAllLines(@"Save.txt", savings);
+                File.WriteAllLines(@"Save.ini", savings);
                 Console.WriteLine("새로운 저장 파일을 생성했습니다.");
             }
         }
