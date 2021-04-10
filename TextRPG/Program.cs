@@ -8,12 +8,6 @@ namespace TextRPG {
             /// Console.WriteLine("Hello World!");
             /// 게임의 기본 구조
 
-            /** current scene
-             * 0: 메인 메뉴
-             * 1: 태초 마을
-             */
-            int scene = 0;
-
             GameManager Game = new GameManager();
 
             SaveManager.Save.Init();
@@ -21,7 +15,7 @@ namespace TextRPG {
             Console.WriteLine("Initialization Complete!");
 
             while (Game.life) {
-                Game.Game(scene);
+                Game.Game();
             }
             
             return;
@@ -34,7 +28,7 @@ namespace TextRPG {
         public bool isDead = false;
 
         public SaveData() {
-            if (File.Exists(@"Save.txt")) {
+            if (File.Exists(@"Save.ini")) {
                 string[] lines = File.ReadAllLines(@"Save.ini");
                 foreach (string line in lines) {
                     string[] param = line.Split('=');
@@ -100,14 +94,24 @@ namespace TextRPG {
 
     class GameManager {
         public bool life = true;
+        /** current scene
+         * 0: 메인 메뉴
+         * 1: 태초 마을
+         */
+        int scene = 0;
 
-        public void Game(int scene) {
+        public void Game() {
             switch (scene) {
                 case 0:
                     MainMenu();
                     break;
 
                 case 1:
+                    GamePlay();
+                    break;
+
+                case 2:
+                    Options();
                     break;
             }
         }
@@ -121,14 +125,39 @@ namespace TextRPG {
             string read = Console.ReadLine();
             switch (read) {
                 case "1":
-                    Console.WriteLine("1번 입력됨");
+                    scene = 1;
                     break;
 
                 case "2":
+                    scene = 2;
                     break;
 
                 case "3":
-                    this.life = false;
+                    life = false;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        private void GamePlay() {
+            Console.Clear();
+            Console.WriteLine("[Text RPG]");
+            switch (SaveManager.Save.place) {
+                case 0:     /// 태초 마을
+                    
+                    break;
+            }
+        }
+
+        private void Options() {
+            Console.Clear();
+            Console.WriteLine("[Options]\n1.뒤로가기\n\n────────────────────\n[입력]");
+            string read = Console.ReadLine();
+            switch (read) {
+                case "1":
+                    scene = 0;
                     break;
 
                 default:
